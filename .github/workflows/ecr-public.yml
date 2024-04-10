@@ -5,7 +5,6 @@ permissions:
   id-token: write
 
 on:
-
   push:
     branches:
       - main
@@ -14,19 +13,16 @@ on:
     - cron: 0 0 * * 0
 
 jobs:
-
   ecr-public:
-
     runs-on: ubuntu-latest
 
     env:
       CONTAINER_REGISTRY: public.ecr.aws
-      CONTAINER_REPOSITORY: andreswebs/header-authorizer
-      IMAGE_TAG:  ${{ github.sha }}
+      CONTAINER_REPOSITORY: andreswebs/header-authorizer-lambda
+      IMAGE_TAG: ${{ github.sha }}
       IMAGE_DEFAULT_TAG: latest
 
     steps:
-
       - name: Checkout
         uses: actions/checkout@v4
 
