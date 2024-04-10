@@ -1,0 +1,7 @@
+{
+  "type": "REQUEST",
+  "methodArn": "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/request",
+  "headers": {
+    "X-Telegram-Bot-Api-Secret-Token": "wrong-token"
+  }
+}
