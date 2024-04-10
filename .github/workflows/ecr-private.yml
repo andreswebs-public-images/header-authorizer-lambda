@@ -1,0 +1,72 @@
+---
+name: ecr
+
+permissions:
+  id-token: write
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+
+  schedule:
+    - cron: 0 0 * * 0
+
+jobs:
+  ecr-private:
+    runs-on: ubuntu-latest
+
+    env:
+      CONTAINER_REPOSITORY: andreswebs/header-authorizer-lambda
+      IMAGE_TAG: ${{ github.sha }}
+      IMAGE_DEFAULT_TAG: latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+
+      - name: Login to Amazon ECR
+        if: ${{ github.event_name != 'pull_request' }}
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Format image names
+        id: image-names
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          CONTAINER_REPO_BASE_NAME="${{ env.CONTAINER_REPOSITORY }}"
+          IMAGE_TAG="${{ env.IMAGE_TAG }}"
+          IMAGE_DEFAULT_TAG="${{ env.IMAGE_DEFAULT_TAG }}"
+          if [ "${EVENT}" != "pull_request" ]; then
+            CONTAINER_REGISTRY="${{ steps.ecr-login.outputs.registry }}"
+            CONTAINER_REPO_NAME="${CONTAINER_REGISTRY}/${CONTAINER_REPO_BASE_NAME}"
+          else
+            CONTAINER_REPO_NAME="${CONTAINER_REPO_BASE_NAME}"
+          fi
+          IMAGE="${CONTAINER_REPO_NAME}:${IMAGE_TAG}"
+          IMAGE_DEFAULT="${CONTAINER_REPO_NAME}:${IMAGE_DEFAULT_TAG}"
+          echo "image=${IMAGE}" >> $GITHUB_OUTPUT
+          echo "images=${IMAGE},${IMAGE_DEFAULT}" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.image-names.outputs.images }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          provenance: false
