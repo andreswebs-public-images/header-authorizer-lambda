@@ -79,10 +79,9 @@ jobs:
 
   ecr-private-publish:
     uses: andreswebs/gh-actions/.github/workflows/aws-ecr-publish-image.yml@main
-    secrets: inherit
     with:
-      aws-region: ${{ secrets.AWS_REGION }}
-      role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+      aws-region: ${{ vars.AWS_REGION }}
+      role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
       ecr-repo-name: andreswebs/header-authorizer-lambda
       arch-platforms: linux/arm64
 
@@ -100,8 +99,8 @@ jobs:
       - name: Update config parameter
         uses: andreswebs/gh-actions/.github/actions/aws-ssm-put-param@main
         with:
-          aws-region: ${{ secrets.AWS_REGION }}
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
           parameter_type: String
           parameter_name: /images/dev/header-authorizer-lambda
           parameter_value: ${{ steps.image-uri.outputs.value }}
