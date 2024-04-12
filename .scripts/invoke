@@ -10,6 +10,7 @@ curl \
     -v \
     --location \
     --header 'Content-Type: application/json' \
+    --header "${HEADER_KEY}: ${TELEGRAM_BOT_SECRET}" \
     --data-raw "{ \"TestMessage\": \"${MSG}\" }" \
     --request POST \
     "${INVOKE_URL}/"
