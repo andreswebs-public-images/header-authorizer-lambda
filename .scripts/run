@@ -21,4 +21,7 @@ docker run \
     --env AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
     --env AWS_REGION="${AWS_REGION}" \
     --env AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}" \
+    --env HEADER_KEY \
+    --env HEADER_VALUE_PARAMETER \
+    --env PRINCIPAL_ID \
     "${IMG}" /main
