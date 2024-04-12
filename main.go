@@ -72,6 +72,8 @@ func init() {
 func handler(ctx context.Context, req Request) (Response, error) {
 	headerValue, ok := req.Headers[headerKey]
 
+	slog.Debug("debug headers", slog.String("type", "application.inspect"), env, slog.Any("headers", req.Headers))
+
 	if ok && headerValue == secret {
 		slog.Info("allowed", slog.String("type", "application"), env, slog.Bool("h", ok), slog.String("target", req.MethodArn))
 		return generatePolicy(principalID, "Allow", req.MethodArn), nil
