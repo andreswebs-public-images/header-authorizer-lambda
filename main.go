@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"net/http"
 	"os"
 
 	"log/slog"
@@ -70,13 +71,21 @@ func init() {
 }
 
 func handler(ctx context.Context, req Request) (Response, error) {
-	headerValue, ok := req.Headers[headerKey]
 
-	slog.Info("debug headers", slog.String("type", "application.inspect"), env, slog.Bool("h", ok), slog.Any("headers", req.Headers))
-	slog.Info("debug request context", slog.String("type", "application.inspect"), env, slog.Any("requestcontext", req.RequestContext))
-	slog.Info("debug context", slog.String("type", "application.inspect"), env, slog.Any("ctx", ctx))
+	// handle case sensitive headers
+	// https://github.com/aws/aws-lambda-go/issues/117
+	headers := http.Header{}
 
-	if ok && headerValue == secret {
+	for header, values := range req.MultiValueHeaders {
+		for _, value := range values {
+			headers.Add(header, value)
+		}
+	}
+
+	headerValue := headers.Get(headerKey)
+	ok := headerValue != ""
+
+	if headerValue == secret {
 		slog.Info("allowed", slog.String("type", "application"), env, slog.Bool("h", ok), slog.String("target", req.MethodArn))
 		return generatePolicy(principalID, "Allow", req.MethodArn), nil
 	}
