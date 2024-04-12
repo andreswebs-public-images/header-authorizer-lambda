@@ -37,6 +37,9 @@ jobs:
         with:
           key: image
 
+      - name: Inspect
+        run: echo ${{ steps.image-uri.outputs.value }}
+
       - name: Update config parameter
         uses: andreswebs/gh-actions/.github/actions/aws-ssm-put-param@main
         with:
