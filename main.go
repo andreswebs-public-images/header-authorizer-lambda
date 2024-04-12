@@ -20,6 +20,7 @@ var (
 	headerKey            string
 	headerValueParamName string
 	secret               string
+	env                  slog.Attr
 )
 
 type Request events.APIGatewayCustomAuthorizerRequestTypeRequest
@@ -59,14 +60,24 @@ func init() {
 	}
 
 	secret = *headerValueParam.Parameter.Value
+
+	env = slog.Group(
+		"env",
+		slog.String("PRINCIPAL_ID", principalID),
+		slog.String("HEADER_KEY", headerKey),
+		slog.String("HEADER_VALUE_PARAMETER", headerValueParamName),
+	)
 }
 
 func handler(ctx context.Context, req Request) (Response, error) {
 	headerValue, ok := req.Headers[headerKey]
 
 	if ok && headerValue == secret {
+		slog.Info("allowed", env, slog.Bool("h", ok), slog.String("target", req.MethodArn))
 		return generatePolicy(principalID, "Allow", req.MethodArn), nil
 	}
+
+	slog.Info("denied", env, slog.Bool("h", ok), slog.String("target", req.MethodArn))
 	return generatePolicy(principalID, "Deny", req.MethodArn), nil
 }
 
