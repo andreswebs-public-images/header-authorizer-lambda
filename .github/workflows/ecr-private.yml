@@ -85,6 +85,7 @@ jobs:
       role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
       ecr-repo-name: andreswebs/header-authorizer-lambda
       arch-platforms: linux/arm64
+      context-dir: .
 
   deploy-dev:
     needs: ecr-private-publish
