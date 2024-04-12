@@ -76,10 +76,8 @@ func handler(ctx context.Context, req Request) (Response, error) {
 	// https://github.com/aws/aws-lambda-go/issues/117
 	headers := http.Header{}
 
-	for header, values := range req.MultiValueHeaders {
-		for _, value := range values {
-			headers.Add(header, value)
-		}
+	for header, value := range req.Headers {
+		headers.Add(header, value)
 	}
 
 	headerValue := headers.Get(headerKey)
