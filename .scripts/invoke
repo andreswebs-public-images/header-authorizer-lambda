@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+MSG="${MSG:-Hello from ApiGateway!}"
+
+curl \
+    -v \
+    --location \
+    --header 'Content-Type: application/json' \
+    --data-raw "{ \"TestMessage\": \"${MSG}\" }" \
+    --request POST \
+    "${INVOKE_URL}/"
