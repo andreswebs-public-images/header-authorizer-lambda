@@ -77,13 +77,13 @@ jobs:
       #     workflow: path/to/external-workflow.yml
       #     token: ${{ secrets.GITHUB_TOKEN }}
 
-  # ecr-private-publish:
-  #   uses: andreswebs/gh-actions/.github/workflows/aws-ecr-publish-image.yml@main
-  #   with:
-  #     aws-region: ${{ secrets.AWS_REGION }}
-  #     role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
-  #     ecr-repo-name: andreswebs/header-authorizer-lambda
-  #     arch-platforms: linux/arm64
+  ecr-private-publish:
+    uses: andreswebs/gh-actions/.github/workflows/aws-ecr-publish-image.yml@main
+    with:
+      aws-region: ${{ secrets.AWS_REGION }}
+      role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+      ecr-repo-name: andreswebs/header-authorizer-lambda
+      arch-platforms: linux/arm64
 
   # deploy-dev:
   #   needs: ecr-private-publish
