@@ -73,11 +73,11 @@ func handler(ctx context.Context, req Request) (Response, error) {
 	headerValue, ok := req.Headers[headerKey]
 
 	if ok && headerValue == secret {
-		slog.Info("allowed", env, slog.Bool("h", ok), slog.String("target", req.MethodArn))
+		slog.Info("allowed", slog.String("type", "application"), env, slog.Bool("h", ok), slog.String("target", req.MethodArn))
 		return generatePolicy(principalID, "Allow", req.MethodArn), nil
 	}
 
-	slog.Info("denied", env, slog.Bool("h", ok), slog.String("target", req.MethodArn))
+	slog.Info("denied", slog.String("type", "application"), env, slog.Bool("h", ok), slog.String("target", req.MethodArn))
 	return generatePolicy(principalID, "Deny", req.MethodArn), nil
 }
 
