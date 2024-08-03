@@ -12,11 +12,11 @@ on:
       - main
 
   schedule:
-    - cron: 0 0 * * 0
+    - cron: 0 0 * * 0 # sunday midnight
 
 jobs:
   ecr-private:
-    uses: andreswebs/gh-actions/.github/workflows/aws-ecr-publish-image.yml@main
+    uses: andreswebs/gh-actions/.github/workflows/aws-ecr-push-image.yml@main
     with:
       runs-on: ubuntu-latest
       aws-region: ${{ vars.AWS_REGION }}

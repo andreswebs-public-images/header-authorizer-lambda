@@ -1,0 +1,27 @@
+---
+name: Scheduled Build
+
+permissions:
+  id-token: write
+
+on:
+  push:
+    branches:
+      - main
+
+  schedule:
+    - cron: 0 0 * * 0
+
+jobs:
+  build:
+    uses: andreswebs/gh-actions/.github/workflows/aws-ecr-push-image.yml@main
+    with:
+      runs-on: ubuntu-latest
+      aws-region: ${{ vars.AWS_REGION }}
+      role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
+      ecr-repo-name: andreswebs/header-authorizer-lambda
+      ecr-repository-type: public
+      context-dir: .
+      use-hash: true
+      add-image-default-tag: true
+      image-default-tag: latest
