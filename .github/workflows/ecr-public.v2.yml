@@ -20,7 +20,7 @@ jobs:
       aws-region: ${{ vars.AWS_REGION }}
       role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
       ecr-repo-name: andreswebs/header-authorizer-lambda
-      ecr-repository-type: public
+      ecr-registry-type: public
       context-dir: .
       use-hash: true
       add-image-default-tag: true
