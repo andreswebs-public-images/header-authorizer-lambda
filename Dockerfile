@@ -1,4 +1,4 @@
-FROM golang:1.22 as build
+FROM golang:1.22 AS build
 
 ARG TARGETOS="linux"
 ARG TARGETARCH="amd64"
@@ -14,7 +14,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -o "${APP_NAME}" .
+RUN CGO_ENABLED=0 go build -a -o "${APP_NAME}" .
 
 FROM public.ecr.aws/lambda/provided:al2023
 
@@ -24,7 +24,6 @@ ARG APP_NAME="main"
 
 ENV GOARCH="${TARGETARCH}"
 ENV GOOS="${TARGETOS}"
-ENV GOPROXY="${GOPROXY}"
 
-COPY --from=build "/app/${APP_NAME}" "${APP_NAME}"
+COPY --from=build "/app/${APP_NAME}" "/${APP_NAME}"
 ENTRYPOINT ["/${APP_NAME}}"]
