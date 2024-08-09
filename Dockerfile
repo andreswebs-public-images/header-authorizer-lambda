@@ -27,5 +27,5 @@ ENV GOOS="${TARGETOS}"
 ENV APP_NAME="${APP_NAME}"
 
 
-COPY --from=build "/app/${APP_NAME}" "/${APP_NAME}"
-ENTRYPOINT ["/${APP_NAME}"]
+COPY --from=build "/app/${APP_NAME}" "/main"
+ENTRYPOINT ["/main"]
