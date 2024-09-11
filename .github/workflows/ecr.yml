@@ -31,7 +31,7 @@ jobs:
       image-artifact: image-${{ matrix.ecr-registry-type }}
 
   update-dev:
-    needs: ecr-private
+    needs: [build]
     runs-on: ubuntu-latest
     environment: dev
 
