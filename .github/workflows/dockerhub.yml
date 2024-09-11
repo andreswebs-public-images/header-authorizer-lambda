@@ -1,5 +1,5 @@
 ---
-name: docker.io
+name: Docker Hub
 
 on:
   push:

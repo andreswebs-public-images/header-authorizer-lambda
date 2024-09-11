@@ -1,5 +1,6 @@
 .DS_Store
 .envrc
 .tmp
+*.bak
 
 .events/event.success.example.json

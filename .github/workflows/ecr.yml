@@ -1,5 +1,5 @@
 ---
-name: ecr
+name: Amazon ECR
 
 permissions:
   id-token: write
@@ -15,7 +15,11 @@ on:
     - cron: 0 0 * * 0 # sunday midnight
 
 jobs:
-  ecr-private:
+  build:
+    strategy:
+      matrix:
+        ecr-registry-type: [public, private]
+
     uses: andreswebs/gh-actions/.github/workflows/aws-ecr-push-image.yml@main
     with:
       runs-on: ubuntu-latest
@@ -23,6 +27,8 @@ jobs:
       role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
       ecr-repo-name: andreswebs/header-authorizer-lambda
       context-dir: .
+      ecr-registry-type: ${{ matrix.ecr-registry-type }}
+      image-artifact: image-${{ matrix.ecr-registry-type }}
 
   update-dev:
     needs: ecr-private
@@ -34,7 +40,7 @@ jobs:
         id: image-uri
         uses: andreswebs/gh-actions/.github/actions/artifact-as-value@main
         with:
-          key: image
+          key: image-private
 
       - name: Update config parameter
         uses: andreswebs/gh-actions/.github/actions/aws-ssm-put-param@main
