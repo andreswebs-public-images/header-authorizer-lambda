@@ -24,5 +24,4 @@ ARG TARGETARCH="amd64"
 ENV GOARCH="${TARGETARCH}"
 ENV GOOS="${TARGETOS}"
 
-COPY --from=build "/app/bootstrap" "/bootstrap"
-ENTRYPOINT ["/bootstrap"]
+COPY --from=build "/app/bootstrap" "${LAMBDA_RUNTIME_DIR}"
