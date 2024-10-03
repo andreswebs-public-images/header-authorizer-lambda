@@ -3,7 +3,6 @@ FROM golang:1.23 AS build
 ARG TARGETOS="linux"
 ARG TARGETARCH="amd64"
 ARG GOPROXY="https://proxy.golang.org"
-ARG APP_NAME="main"
 
 ENV GOARCH="${TARGETARCH}"
 ENV GOOS="${TARGETOS}"
@@ -14,18 +13,15 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -a -o "${APP_NAME}" .
+RUN CGO_ENABLED=0 go build -a -o main .
 
-FROM public.ecr.aws/lambda/provided:al2023
+FROM public.ecr.aws/lambda/provided:al2023 AS runtime
 
 ARG TARGETOS="linux"
 ARG TARGETARCH="amd64"
-ARG APP_NAME="main"
 
 ENV GOARCH="${TARGETARCH}"
 ENV GOOS="${TARGETOS}"
-ENV APP_NAME="${APP_NAME}"
 
-
-COPY --from=build "/app/${APP_NAME}" "/main"
+COPY --from=build "/app/main" "/main"
 ENTRYPOINT ["/main"]
