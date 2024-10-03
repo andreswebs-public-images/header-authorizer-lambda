@@ -49,4 +49,4 @@ jobs:
           role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
           parameter_type: String
           parameter_name: /images/dev/header-authorizer-lambda
-          parameter_value: ${{ steps.image-uri.outputs.value }}
+          parameter_value: ${{ steps.image-uri.outputs.value }}-arm64
