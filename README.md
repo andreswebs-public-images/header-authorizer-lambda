@@ -35,3 +35,5 @@ This project is licensed under the [Unlicense](UNLICENSE.md).
 ## References
 
 <https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html>
+
+<https://aws.amazon.com/blogs/compute/migrating-aws-lambda-functions-from-the-go1-x-runtime-to-the-custom-runtime-on-amazon-linux-2/>

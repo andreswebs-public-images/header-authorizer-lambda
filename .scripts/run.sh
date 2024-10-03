@@ -24,4 +24,4 @@ docker run \
     --env HEADER_KEY \
     --env HEADER_VALUE_PARAMETER \
     --env PRINCIPAL_ID \
-    "${IMG}" /main
+    "${IMG}" /bootstrap

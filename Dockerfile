@@ -13,7 +13,8 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -a -o main .
+RUN CGO_ENABLED=0 go build -tags lambda.norpc -o bootstrap main.go
+
 
 FROM public.ecr.aws/lambda/provided:al2023 AS runtime
 
@@ -23,5 +24,5 @@ ARG TARGETARCH="amd64"
 ENV GOARCH="${TARGETARCH}"
 ENV GOOS="${TARGETOS}"
 
-COPY --from=build "/app/main" "/main"
-ENTRYPOINT ["/main"]
+COPY --from=build "/app/bootstrap" "/bootstrap"
+ENTRYPOINT ["/bootstrap"]
