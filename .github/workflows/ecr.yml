@@ -47,6 +47,6 @@ jobs:
         with:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
-          parameter_type: String
-          parameter_name: /images/dev/header-authorizer-lambda
-          parameter_value: ${{ steps.image-uri.outputs.value }}-arm64
+          parameter-type: String
+          parameter-name: /images/dev/header-authorizer-lambda
+          parameter-value: ${{ steps.image-uri.outputs.value }}-arm64
