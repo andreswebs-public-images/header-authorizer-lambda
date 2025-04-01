@@ -9,19 +9,24 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
 
 var (
-	sess                 *session.Session
-	ssmClient            *ssm.SSM
+	cfg       *aws.Config
+	ssmClient *ssm.Client
+	env       slog.Attr
+
+	principalIDEnvVar      string = "PRINCIPAL_ID"
+	headerKeyEnvVar        string = "HEADER_KEY"
+	headerValueParamEnvVar string = "HEADER_VALUE_PARAMETER"
+
 	principalID          string
 	headerKey            string
 	headerValueParamName string
 	secret               string
-	env                  slog.Attr
 )
 
 type Request events.APIGatewayCustomAuthorizerRequestTypeRequest
@@ -31,27 +36,20 @@ func init() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
-	sess = session.Must(session.NewSession())
-	ssmClient = ssm.New(sess)
-
-	principalID = os.Getenv("PRINCIPAL_ID")
-	if principalID == "" {
-		principalID = "user"
-	}
-
-	headerKey = os.Getenv("HEADER_KEY")
-	if headerKey == "" {
-		slog.Error("missing environment variable HEADER_KEY")
+	ctx := context.TODO()
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		slog.Error("unable to load AWS configuration", slog.Any("err", err))
 		os.Exit(1)
 	}
 
-	headerValueParamName = os.Getenv("HEADER_VALUE_PARAMETER")
-	if headerValueParamName == "" {
-		slog.Error("missing environment variable HEADER_VALUE_PARAMETER")
-		os.Exit(1)
-	}
+	ssmClient = ssm.NewFromConfig(cfg)
 
-	headerValueParam, err := ssmClient.GetParameter(&ssm.GetParameterInput{
+	principalID = ReadEnvVarWithDefault(principalIDEnvVar, "user")
+	headerKey = ReadRequiredEnvVar(headerKeyEnvVar)
+	headerValueParamName = ReadRequiredEnvVar(headerValueParamEnvVar)
+
+	headerValueParam, err := ssmClient.GetParameter(ctx, &ssm.GetParameterInput{
 		Name:           aws.String(headerValueParamName),
 		WithDecryption: aws.Bool(true),
 	})
@@ -64,9 +62,9 @@ func init() {
 
 	env = slog.Group(
 		"env",
-		slog.String("PRINCIPAL_ID", principalID),
-		slog.String("HEADER_KEY", headerKey),
-		slog.String("HEADER_VALUE_PARAMETER", headerValueParamName),
+		slog.String(principalIDEnvVar, principalID),
+		slog.String(headerKeyEnvVar, headerKey),
+		slog.String(headerValueParamEnvVar, headerValueParamName),
 	)
 }
 
@@ -75,7 +73,6 @@ func handler(ctx context.Context, req Request) (Response, error) {
 	// handle case sensitive headers
 	// https://github.com/aws/aws-lambda-go/issues/117
 	headers := http.Header{}
-
 	for header, value := range req.Headers {
 		headers.Add(header, value)
 	}
