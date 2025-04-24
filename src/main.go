@@ -36,6 +36,10 @@ func init() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
+	principalID = ReadEnvVarWithDefault(principalIDEnvVar, "user")
+	headerKey = ReadRequiredEnvVar(headerKeyEnvVar)
+	headerValueParamName = ReadRequiredEnvVar(headerValueParamEnvVar)
+
 	ctx := context.TODO()
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
@@ -44,10 +48,6 @@ func init() {
 	}
 
 	ssmClient = ssm.NewFromConfig(cfg)
-
-	principalID = ReadEnvVarWithDefault(principalIDEnvVar, "user")
-	headerKey = ReadRequiredEnvVar(headerKeyEnvVar)
-	headerValueParamName = ReadRequiredEnvVar(headerValueParamEnvVar)
 
 	headerValueParam, err := ssmClient.GetParameter(ctx, &ssm.GetParameterInput{
 		Name:           aws.String(headerValueParamName),
