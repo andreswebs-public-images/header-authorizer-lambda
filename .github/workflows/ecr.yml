@@ -3,6 +3,7 @@ name: Amazon ECR
 
 permissions:
   id-token: write
+  contents: read
 
 on:
   workflow_dispatch:
@@ -11,8 +12,8 @@ on:
     branches:
       - main
 
-  schedule:
-    - cron: 0 0 * * 0 # sunday midnight
+  # schedule:
+  #   - cron: 0 0 * * 0 # sunday midnight
 
 jobs:
   build:
@@ -46,7 +47,9 @@ jobs:
         uses: andreswebs/gh-actions/.github/actions/aws-ssm-put-param@main
         with:
           aws-region: ${{ vars.AWS_REGION }}
+          parent-role-to-assume: ${{ vars.AWS_ENTRY_IAM_ROLE_ARN }}
           role-to-assume: ${{ vars.AWS_IAM_ROLE_ARN }}
+          role-chaining: true
           parameter-type: String
-          parameter-name: /images/dev/header-authorizer-lambda
+          parameter-name: ${{ vars.IMAGE_PARAMETER_NAME }}
           parameter-value: ${{ steps.image-uri.outputs.value }}-arm64
