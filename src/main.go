@@ -35,37 +35,6 @@ type Response events.APIGatewayCustomAuthorizerResponse
 func init() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
-
-	principalID = ReadEnvVarWithDefault(principalIDEnvVar, "user")
-	headerKey = ReadRequiredEnvVar(headerKeyEnvVar)
-	headerValueParamName = ReadRequiredEnvVar(headerValueParamEnvVar)
-
-	ctx := context.TODO()
-	cfg, err := config.LoadDefaultConfig(ctx)
-	if err != nil {
-		slog.Error("unable to load AWS configuration", slog.Any("err", err))
-		os.Exit(1)
-	}
-
-	ssmClient = ssm.NewFromConfig(cfg)
-
-	headerValueParam, err := ssmClient.GetParameter(ctx, &ssm.GetParameterInput{
-		Name:           aws.String(headerValueParamName),
-		WithDecryption: aws.Bool(true),
-	})
-	if err != nil {
-		slog.Error("failed to fetch SSM parameter", slog.String("parameterName", headerValueParamName), slog.Any("err", err))
-		os.Exit(1)
-	}
-
-	secret = *headerValueParam.Parameter.Value
-
-	env = slog.Group(
-		"env",
-		slog.String(principalIDEnvVar, principalID),
-		slog.String(headerKeyEnvVar, headerKey),
-		slog.String(headerValueParamEnvVar, headerValueParamName),
-	)
 }
 
 func handler(ctx context.Context, req Request) (Response, error) {
@@ -106,5 +75,39 @@ func generatePolicy(principalID, effect, resource string) Response {
 }
 
 func main() {
+	principalID = ReadEnvVarWithDefault(principalIDEnvVar, "user")
+	headerKey = ReadRequiredEnvVar(headerKeyEnvVar)
+	headerValueParamName = ReadRequiredEnvVar(headerValueParamEnvVar)
+
+	env = slog.Group(
+		"env",
+		slog.String(principalIDEnvVar, principalID),
+		slog.String(headerKeyEnvVar, headerKey),
+		slog.String(headerValueParamEnvVar, headerValueParamName),
+	)
+
+	ctx := context.TODO()
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		slog.Error("unable to load AWS configuration", slog.Any("err", err))
+		os.Exit(1)
+	}
+
+	if ssmClient == nil {
+		ssmClient = ssm.NewFromConfig(cfg)
+	}
+
+	if secret == "" {
+		headerValueParam, err := ssmClient.GetParameter(ctx, &ssm.GetParameterInput{
+			Name:           aws.String(headerValueParamName),
+			WithDecryption: aws.Bool(true),
+		})
+		if err != nil {
+			slog.Error("failed to fetch SSM parameter", slog.String("parameterName", headerValueParamName), slog.Any("err", err))
+			os.Exit(1)
+		}
+		secret = *headerValueParam.Parameter.Value
+	}
+
 	lambda.Start(handler)
 }
